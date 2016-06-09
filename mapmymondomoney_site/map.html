@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Map My Mondo Money</title>
+
+  <!-- Bootstrap -->
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/bootstrap-theme.min.css" rel="stylesheet">
+
+  <script src='https://maps.googleapis.com/maps/api/js?v=3.exp'></script>
+
+</head>
+<body>
+
+<div class="container theme-showcase" role="main">
+   
+<div class="jumbotron">
+  <h1>Where have I spent my Mondo money?</h1>
+  <button type="button" class="btn btn-lg btn-success" onclick="location.href='/logout';">Logout</button>
+</div> 
+
+
+<div class="well">
+  <p>The map shows all transactions where money was spent.  The markers are on the map at
+  the address of the merchant, which is not necessarily the location of the terminal where
+  money was spent.</p>
+</div>
+
+<center>
+<div style='overflow:hidden;height:440px;width:700px;margin-bottom=20px'>
+ <div id='gmap_canvas' style='height:440px;width:700px;'></div>
+ <div><small><a href="http://embedgooglemaps.com">map</a></small></div>
+ <div><small><a href="http://googlemapsgenerator.com/">Google maps generator</a></small></div>
+ <style>#gmap_canvas img{max-width:none!important;}</style>
+</div>
+</center>
+
+<p><small>Created by David Norman (david@mitzycat.co.uk)</small></p>
+
+</div>
+
+<script type='text/javascript'>
+
+function makeMarkerHtml(t)
+{
+  var v = (t.amount / 100.0).toFixed(2);
+  var amount = v.replace(/(\d)(?=(\d{3})+\.)/g, '$1,')
+  return "<B>"+t.name+"</B><HR><SMALL>£"+amount+"</SMALL>";
+}
+
+function init()
+{
+  var myOptions = {zoom:10,center:{lat:51.5073509,lng:-2.6},mapTypeId: google.maps.MapTypeId.ROADMAP};
+  map = new google.maps.Map(document.getElementById('gmap_canvas'), myOptions);
+
+  $.get( "get_transactions", {},
+    function(data) {
+      data.forEach( function(t) {
+        m = new google.maps.Marker({
+          title: t.name,
+          map: map,
+          position: new google.maps.LatLng(t.lat,t.lng)
+        });
+        m.addListener('click', function(e) {
+          new google.maps.InfoWindow({
+            content: makeMarkerHtml(t),
+            map: map,
+            position: e.latLng
+          });
+        });
+      });
+    }
+  );
+}
+
+google.maps.event.addDomListener(window, 'load', init);
+</script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>
+
